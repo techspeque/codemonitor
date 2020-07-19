@@ -1,0 +1,13 @@
+{
+  "name": "codemonitor",
+  "description": "",
+  "version": "0.1.0",
+  "dependencies": {
+    "serverless-prune-plugin": "^1.4.0"
+  },
+  "devDependencies": {
+    "serverless-dependson-plugin": "^1.1.2",
+    "serverless-plugin-optimize": "^4.1.4-rc.1",
+    "serverless-prune-plugin": "^1.4.0"
+  }
+}

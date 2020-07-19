@@ -1,0 +1,123 @@
+service: codemonitor
+
+plugins:
+  - serverless-prune-plugin
+  - serverless-plugin-optimize
+  - serverless-dependson-plugin
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${env:STAGE}
+  region: ${opt:region}
+  role: serviceRole
+  stackName: codemonitor
+
+resources:
+  Resources:
+    serviceRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /
+        RoleName:
+          'Fn::Join':
+            - '-'
+            -
+              - 'aws-glo'
+              - 'iam-rol'
+              - 'code_monitor'
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName:
+              'Fn::Join':
+                - '-'
+                -
+                  - 'aws-glo'
+                  - 'iam-pol'
+                  - 'codemonitor_execution'
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource:
+                    - 'Fn::Join':
+                      - ':'
+                      -
+                        - 'arn:aws:logs'
+                        - Ref: 'AWS::Region'
+                        - Ref: 'AWS::AccountId'
+                        - 'log-group:/aws/lambda/*:*:*'
+          - PolicyName:
+              'Fn::Join':
+                - '-'
+                -
+                  - 'aws-glo'
+                  - 'iam-pol'
+                  - 'codemonitor_codepipeline'
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - codepipeline:ListPipelines
+                    - codepipeline:GetPipelineState
+                    - codepipeline:ListPipelineExecutions
+                  Resource:
+                    - 'Fn::Join':
+                      - ':'
+                      -
+                        - 'arn:aws:codepipeline'
+                        - Ref: 'AWS::Region'
+                        - Ref: 'AWS::AccountId'
+                        - '*'
+
+package:
+  exclude:
+    - node_modules/**
+    - .vscode/**
+    - package.json
+    - package-lock.json
+    - yarn.lock
+    - .env
+
+functions:
+  listPipelines:
+    name: listPipelines
+    description: list existing AWS CodePipeline pipelines
+    handler: api/listpipelines.main
+    environment:
+      LOGLEVEL: DEBUG
+    events:
+      - http: 
+          path: codepipeline/pipelines/list
+          method: get
+  describePipeline:
+    name: describePipeline
+    description: describe existing AWS CodePipeline pipeline
+    handler: api/describepipeline.main
+    environment:
+      LOGLEVEL: DEBUG
+    events:
+      - http: 
+          path: codepipeline/pipelines/describe/{name}
+          method: get
+
+custom:
+  dependsOn:
+    enabled: true
+    chains: 3  
+  prune:
+    automatic: true
+    includeLayers: true
+    number: 30
