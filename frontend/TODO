@@ -1,0 +1,3 @@
+- dockerfile for hosting
+- pulumi for infra
+- skaffold for dev process (deploy?)

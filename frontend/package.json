@@ -1,0 +1,21 @@
+{
+  "name": "codemonitor",
+  "version": "0.1.0",
+  "description": "dashboard for the code monitor utility",
+  "main": "src/app.js",
+  "scripts": {
+    "setup": "export PORT=$npm_config_port && npm install && nodemon $npm_config_exe -e .js,.hbs"
+  },
+  "keywords": [
+    "codemonitor",
+    "node",
+    "express"
+  ],
+  "author": "Adam Jasinski (@techspeque)",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4",
+    "hbs": "^4.1.1",
+    "postman-request": "^2.88.1-postman.22"
+  }
+}
